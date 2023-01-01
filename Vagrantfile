@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/BlockLength
+# master server
 Vagrant.configure('2') do |config|
-  # master server
   config.vm.define 'kmaster' do |kmaster|
     kmaster.vm.box = 'debian/bullseye64'
     kmaster.vm.hostname = 'kmaster'
@@ -19,9 +18,13 @@ Vagrant.configure('2') do |config|
       echo "vagrant:vagrant" | chpasswd
       service ssh restart
     SHELL
+    config.vm.provision 'shell', path: 'install_common.sh'
   end
-  number_srv = 2
-  # slave servers
+end
+
+# slave servers
+number_srv = 2
+Vagrant.configure('2') do |config|
   (1..number_srv).each do |i|
     config.vm.define "knode#{i}" do |knode|
       knode.vm.box = 'debian/bullseye64'
@@ -37,7 +40,7 @@ Vagrant.configure('2') do |config|
         echo "vagrant:vagrant" | chpasswd
         service ssh restart
       SHELL
+      config.vm.provision 'shell', path: 'install_common.sh'
     end
   end
 end
-# rubocop:enable Metrics/BlockLength
