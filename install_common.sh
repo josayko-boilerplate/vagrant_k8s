@@ -13,28 +13,38 @@ if [ "$host_exist" == "0" ];then
 fi
 
 echo "[2]: disable swap"
-# swapoff -a to disable swapping
 swapoff -a
-# sed to comment the swap partition in /etc/fstab
 sed -i.bak -r 's/(.+ swap .+)/#\1/' /etc/fstab
 
 echo "[3]: install utils"
 apt-get update -qq >/dev/null
-apt-get install -y -qq apt-transport-https curl >/dev/null
+apt-get install -y -qq apt-transport-https ca-certificates curl gnupg lsb-release >/dev/null
 
 echo "[4]: install docker if not exist"
 if [ ! -f "/usr/bin/docker" ];then
-  curl -s -fsSL https://get.docker.com | sh;
+  mkdir -p /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  apt-get update -qq >/dev/null
+  apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin >/dev/null
 fi
 
-echo "[5]: add kubernetes repository to source.list"
+echo "[5]: containerd configuration"
+rm -rf /etc/containerd/config.toml
+containerd config default | tee /etc/containerd/config.toml >/dev/null
+sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+systemctl restart containerd
+
+echo "[6]: add kubernetes repository to source.list"
 if [ ! -f "/etc/apt/sources.list.d/kubernetes.list" ];then
   curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" >/etc/apt/sources.list.d/kubernetes.list
 fi
 apt-get update -qq >/dev/null
 
-echo "[6]: install kubelet / kubeadm / kubectl / kubernetes-cni"
+echo "[7]: install kubelet / kubeadm / kubectl / kubernetes-cni"
 apt-get install -y -qq kubelet kubeadm kubectl kubernetes-cni >/dev/null
 
 
