@@ -15,13 +15,13 @@ Vagrant.configure('2') do |config|
       v.customize ['modifyvm', :id, '--memory', 2048]
       v.customize ['modifyvm', :id, '--cpus', '2']
     end
-    config.vm.provision 'shell', inline: <<-SHELL
+    kmaster.vm.provision 'shell', inline: <<-SHELL
       sed -i 's/ChallengeResponseAuthentication no/ChallengeResponseAuthentication yes/g' /etc/ssh/sshd_config
       echo "vagrant:vagrant" | chpasswd
       service ssh restart
     SHELL
-    config.vm.provision 'shell', path: 'install_common.sh'
-    config.vm.provision 'shell', path: 'install_master.sh'
+    kmaster.vm.provision 'shell', path: 'install_common.sh'
+    kmaster.vm.provision 'shell', path: 'install_master.sh'
   end
 end
 
@@ -40,12 +40,13 @@ Vagrant.configure('2') do |config|
         v.memory = 1024
         v.cpus = 1
       end
-      config.vm.provision 'shell', inline: <<-SHELL
+      knode.vm.provision 'shell', inline: <<-SHELL
         sed -i 's/ChallengeResponseAuthentication no/ChallengeResponseAuthentication yes/g' /etc/ssh/sshd_config
         echo "vagrant:vagrant" | chpasswd
         service ssh restart
       SHELL
-      config.vm.provision 'shell', path: 'install_common.sh'
+      knode.vm.provision 'shell', path: 'install_common.sh'
+      knode.vm.provision 'shell', path: 'install_node.sh'
     end
   end
 end
