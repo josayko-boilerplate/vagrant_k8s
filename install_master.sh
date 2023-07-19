@@ -18,11 +18,11 @@ mkdir $HOME/.kube
 cp /etc/kubernetes/admin.conf $HOME/.kube/config
 
 echo "[3]: create flannel pods network"
-kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.20.2/Documentation/kube-flannel.yml
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.22.0/Documentation/kube-flannel.yml
 
 echo "[4]: restart and enable kubelet"
-systemctl enable kubelet
-service kubelet restart
+sudo systemctl enable kubelet
+sudo systemctl restart kubelet
 
 echo "END - install master - " $IP
 

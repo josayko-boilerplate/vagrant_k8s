@@ -15,7 +15,7 @@ kubeadm join --ignore-preflight-errors=all --token="$TOKEN" 192.168.56.10:6443 -
 
 echo "[2]: restart and enable kubelet"
 systemctl enable kubelet
-service kubelet restart
+systemctl restart kubelet
 
 echo "END - install node - " $IP
 
